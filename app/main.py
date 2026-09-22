@@ -18,10 +18,9 @@ local_tools = {"read": read}
 
 def call_tool(tool):
     print(tool)
-    func = tool.get("function", {})
-    name = func.get("name")
-    arguments = func.get("arguments")
-    arguments = eval(arguments)
+    func = tool.function
+    name = func.name
+    arguments = func.arguments
     callable = local_tools.get(name)
     if callable:
         return callable(**arguments)
@@ -78,18 +77,54 @@ def main():
     print("Logs from your program will appear here!", file=sys.stderr)
 
     # TODO: Uncomment the following line to pass the first stage
-    choice = chat.choices[0]
-    print(choice)
-    if not choice.message and choice.tool_calls:
+    choice = chat.choices[0].message
+    if choice.tool_calls:
         if len(choice.tool_calls) > 1:
             res = call_tools(choice.tool_calls)
-            # print(res)
+            print(res)
         elif len(choice.tool_calls) == 1:
             res = call_tool(choice.tool_calls[0])
-            # print(res)
+            print(res)
     else:
         print(chat.choices[0].message.content)
 
 
 if __name__ == "__main__":
     main()
+    # call_tool(
+    #     [
+    #         ChatCompletionMessageFunctionToolCall(
+    #             id="toolu_bdrk_012yAUUL1EU6wePXkQA9afEB",
+    #             function=Function(
+    #                 arguments='{"file_path": "raspberry.py"}', name="read"
+    #             ),
+    #             type="function",
+    #             index=0,
+    #         )
+    #     ]
+    # )
+    # Choice(
+    #     finish_reason="tool_calls",
+    #     index=0,
+    #     logprobs=None,
+    #     message=ChatCompletionMessage(
+    #         content=None,
+    #         refusal=None,
+    #         role="assistant",
+    #         annotations=None,
+    #         audio=None,
+    #         function_call=None,
+    #         tool_calls=[
+    #             ChatCompletionMessageFunctionToolCall(
+    #                 id="toolu_bdrk_012yAUUL1EU6wePXkQA9afEB",
+    #                 function=Function(
+    #                     arguments='{"file_path": "raspberry.py"}', name="read"
+    #                 ),
+    #                 type="function",
+    #                 index=0,
+    #             )
+    #         ],
+    #         reasoning=None,
+    #     ),
+    #     native_finish_reason="tool_use",
+    # )
