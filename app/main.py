@@ -27,7 +27,6 @@ def call_tool(tool):
         return callable(**arguments)
 
 
-
 def call_tools(tools):
     results = []
     for tool in tools:
@@ -83,10 +82,10 @@ def main():
     if not choice.message and choice.tool_calls:
         if len(choice.tool_calls) > 1:
             res = call_tools(choice.tool_calls)
-            print(res)
+            # print(res)
         elif len(choice.tool_calls) == 1:
             res = call_tool(choice.tool_calls[0])
-            print(res)
+            # print(res)
     else:
         print(chat.choices[0].message.content)
 
