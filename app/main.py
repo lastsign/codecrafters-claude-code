@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from app.tools import read, write
+from app.tools import bash, read, write
 
 load_dotenv()
 
@@ -12,7 +12,7 @@ API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
 
 
-local_tools = {"read": read, "write": write}
+local_tools = {"read": read, "write": write, "bash": bash}
 
 
 def call_tool(tool):
@@ -106,6 +106,23 @@ def main():
                             "type": "string",
                             "description": "The content to write to the file",
                         },
+                    },
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "bash",
+                "description": "Execute a shell command",
+                "parameters": {
+                    "type": "object",
+                    "required": ["command"],
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "The command to execute",
+                        }
                     },
                 },
             },
