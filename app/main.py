@@ -1,7 +1,5 @@
 import argparse
-from http import client
 import os
-import sys
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -52,8 +50,7 @@ class Agent:
     def agent_loop(self, messages):
         while True:
             response = self.call_api(messages)
-            print(response)
-            messages.append(response)
+            messages.append(response.choices[0].message)
 
             if not response.choices[0].message.tool_calls:
                 print(response.choices[0].message.content)
@@ -62,11 +59,7 @@ class Agent:
             for tool in response.choices[0].message.tool_calls:
                 result = call_tool(tool)
                 messages.append(
-                    {
-                        "role": "tool",
-                        "tool_call_id": tool.id,
-                        "content": result
-                    }
+                    {"role": "tool", "tool_call_id": tool.id, "content": result}
                 )
 
 
@@ -131,3 +124,61 @@ def main():
 
 if __name__ == "__main__":
     main()
+# ChatCompletion(
+#     id="gen-1790070615-YMKfj03z6epPt9Nmnhyl",
+#     choices=[
+#         Choice(
+#             finish_reason="tool_calls",
+#             index=0,
+#             logprobs=None,
+#             message=ChatCompletionMessage(
+#                 content=None,
+#                 refusal=None,
+#                 role="assistant",
+#                 annotations=None,
+#                 audio=None,
+#                 function_call=None,
+#                 tool_calls=[
+#                     ChatCompletionMessageFunctionToolCall(
+#                         id="toolu_bdrk_01Eqc3YZ1LMqYK5vUyuFfRkS",
+#                         function=Function(
+#                             arguments='{"file_path": "README.md"}', name="read"
+#                         ),
+#                         type="function",
+#                         index=0,
+#                     )
+#                 ],
+#                 reasoning=None,
+#             ),
+#             native_finish_reason="tool_use",
+#         )
+#     ],
+#     created=1790070615,
+#     model="anthropic/claude-haiku-4.5",
+#     object="chat.completion",
+#     service_tier="default",
+#     system_fingerprint=None,
+#     usage=CompletionUsage(
+#         completion_tokens=56,
+#         prompt_tokens=595,
+#         total_tokens=651,
+#         completion_tokens_details=CompletionTokensDetails(
+#             accepted_prediction_tokens=None,
+#             audio_tokens=0,
+#             reasoning_tokens=0,
+#             rejected_prediction_tokens=None,
+#             image_tokens=0,
+#         ),
+#         prompt_tokens_details=PromptTokensDetails(
+#             audio_tokens=0, cached_tokens=0, cache_write_tokens=0, video_tokens=0
+#         ),
+#         cost=0.00086625,
+#         is_byok=False,
+#         cost_details={
+#             "upstream_inference_cost": 0.000875,
+#             "upstream_inference_prompt_cost": 0.000595,
+#             "upstream_inference_completions_cost": 0.00028,
+#         },
+#     ),
+#     provider="Amazon Bedrock",
+# )
