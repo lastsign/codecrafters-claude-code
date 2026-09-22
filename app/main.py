@@ -5,7 +5,7 @@ import sys
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from app.tools import read
+from app.tools.read import read
 
 load_dotenv()
 
@@ -13,11 +13,10 @@ API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
 
 
-local_tools = {"read", read}
+local_tools = {"read": read}
 
 
 def call_tool(tool):
-    print(tool)
     func = tool.get("function", {})
     name = func.get("name")
     arguments = func.get("arguments")
@@ -28,11 +27,11 @@ def call_tool(tool):
 
 
 def call_tools(tools):
-    results = {}
+    results = []
     for tool in tools:
         res = call_tool(tool)
         print(res)
-        results[tool] = res
+        results.append(res)
     return results
 
 
@@ -90,4 +89,15 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    call_tools(
+        [
+            {
+                "type": "function",
+                "function": {
+                    "name": "read",
+                    "arguments": '{"file_path": "apple.py"}',
+                },
+            }
+        ]
+    )

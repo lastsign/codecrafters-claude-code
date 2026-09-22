@@ -14,10 +14,10 @@ def propagate_folder(file_path: Path) -> str:
 
 
 def read(file_path: str) -> str:
-    q = Path(file_path)
+    q = Path(Path.cwd() / file_path)
 
     if not q.exists():
-        return f"[Errno 2] No such file or directory: '{file_path}'"
+        return f"[Errno 2] No such file or directory: '{q}'"
 
     if q.is_dir():
         contents = propagate_folder(q)
