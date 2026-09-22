@@ -89,15 +89,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    call_tools(
-        [
-            {
-                "type": "function",
-                "function": {
-                    "name": "read",
-                    "arguments": '{"file_path": "apple.py"}',
-                },
-            }
-        ]
-    )
+    main()
