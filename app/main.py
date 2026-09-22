@@ -44,7 +44,7 @@ class Agent:
     def call_api(self, messages):
         chat = self.client.chat.completions.create(
             model=self.model,
-            messages=messages
+            messages=messages,
             tools=self.tools,
         )
         return chat
