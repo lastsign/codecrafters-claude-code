@@ -124,7 +124,7 @@ def main():
     # else:
     #     print(chat.choices[0].message.content)
 
-    agent = Agent(client, tools)
+    agent = Agent(tools)
     agent.agent_loop(messages)
 
 
