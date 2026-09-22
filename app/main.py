@@ -4,9 +4,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from app.tools import bash, read, write
-
-from .get_tools import get_tools
+from app.tools import bash, get_tools, read, write
 
 load_dotenv()
 
@@ -14,10 +12,9 @@ API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
 
 
-local_tools = {"read": read, "write": write, "bash": bash}
-
-
 def call_tool(tool):
+    local_tools = {"read": read, "write": write, "bash": bash}
+
     func = tool.function
     name = func.name
     arguments = eval(func.arguments)
@@ -57,9 +54,10 @@ class Agent:
                 raise RuntimeError("no choices in response")
 
             message = response.choices[0].message
-            print(message)
 
-            messages.append(message)
+            messages.append(
+                {"role": "assistant", "content": None, "tool_calls": message.tool_calls}
+            )
 
             if not message.tool_calls:
                 print(message.content)
