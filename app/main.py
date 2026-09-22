@@ -52,6 +52,7 @@ class Agent:
     def agent_loop(self, messages):
         while True:
             response = self.call_api(messages)
+            print(response)
             messages.append(response)
 
             if not response.choices[0].message.tool_calls:
