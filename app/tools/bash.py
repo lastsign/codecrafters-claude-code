@@ -54,7 +54,7 @@ def bash(command: str) -> str:
                 return f"path outside project is not allowed: {a}"
 
     try:
-        r = subprocess.run(args, capture_output=True, text=True, timeout=30, cwd=ROOT)
+        r = subprocess.run(args, capture_output=True, text=True, timeout=30, cwd=ROOT, check=False)
     except subprocess.TimeoutExpired:
         return "command timed out"
     out = r.stdout + r.stderr
