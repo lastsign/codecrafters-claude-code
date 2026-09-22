@@ -54,15 +54,10 @@ def bash(command: str) -> str:
                 return f"path outside project is not allowed: {a}"
 
     try:
-        r = subprocess.run(args, capture_output=True, text=True, timeout=30, cwd=ROOT, check=False)
+        r = subprocess.run(
+            args, capture_output=True, text=True, timeout=30, cwd=ROOT, check=False
+        )
     except subprocess.TimeoutExpired:
         return "command timed out"
     out = r.stdout + r.stderr
     return out if r.returncode == 0 else f"exit code {r.returncode}\n{out}"
-
-
-if __name__ == "__main__":
-    res = bash("ls")
-    print(res)
-    res = bash("rm -rf test/test_bash.py test")
-    print(res)
