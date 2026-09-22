@@ -56,7 +56,6 @@ class Agent:
 
             message = response.choices[0].message
             print(message)
-            exit(1)
 
             messages.append(message)
 
