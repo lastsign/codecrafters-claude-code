@@ -2,10 +2,38 @@ import argparse
 import os
 import sys
 
+from dotenv import load_dotenv
 from openai import OpenAI
+
+from app.tools import read
+
+load_dotenv()
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
+
+
+local_tools = {"read", read}
+
+
+def call_tool(tool):
+    print(tool)
+    func = tool.get("function", {})
+    name = func.get("name")
+    arguments = func.get("arguments")
+    arguments = eval(arguments)
+    callable = local_tools.get(name)
+    if callable:
+        return callable(**arguments)
+
+
+def call_tools(tools):
+    results = {}
+    for tool in tools:
+        res = call_tool(tool)
+        print(res)
+        results[tool] = res
+    return results
 
 
 def main():
@@ -25,16 +53,16 @@ def main():
                 "name": "read",
                 "description": "Read and return the contents of a file",
                 "parameters": {
-                "type": "object",
-                "properties": {
-                    "file_path": {
-                    "type": "string",
-                    "description": "The path to the file to read"
-                    }
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "The path to the file to read",
+                        }
+                    },
+                    "required": ["file_path"],
                 },
-                "required": ["file_path"]
-                }
-            }
+            },
         }
     ]
 
@@ -51,7 +79,14 @@ def main():
     print("Logs from your program will appear here!", file=sys.stderr)
 
     # TODO: Uncomment the following line to pass the first stage
-    print(chat.choices[0].message.content)
+    choice = chat.choices[0]
+    if not choice.message and choice.tool_calls:
+        if len(choice.tool_calls) > 1:
+            call_tools(choice.tool_calls)
+        elif len(choice.tool_calls) == 1:
+            call_tool(choice.tool_calls[0])
+    else:
+        print(chat.choices[0].message.content)
 
 
 if __name__ == "__main__":
