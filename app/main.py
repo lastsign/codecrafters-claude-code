@@ -17,10 +17,9 @@ local_tools = {"read": read}
 
 
 def call_tool(tool):
-    print(tool)
     func = tool.function
     name = func.name
-    arguments = func.arguments
+    arguments = eval(func.arguments)
     callable = local_tools.get(name)
     if callable:
         return callable(**arguments)
@@ -30,6 +29,7 @@ def call_tools(tools):
     results = []
     for tool in tools:
         res = call_tool(tool)
+        print(res)
         results.append(res)
     return results
 
@@ -81,7 +81,6 @@ def main():
     if choice.tool_calls:
         if len(choice.tool_calls) > 1:
             res = call_tools(choice.tool_calls)
-            print(res)
         elif len(choice.tool_calls) == 1:
             res = call_tool(choice.tool_calls[0])
             print(res)
@@ -89,14 +88,29 @@ def main():
         print(chat.choices[0].message.content)
 
 
+from pydantic import BaseModel
+
+
+class Function(BaseModel):
+    arguments: str
+    name: str
+
+
+class ChatCompletionMessageFunctionToolCall(BaseModel):
+    id: str
+    function: Function
+    type: str
+    index: int
+
+
 if __name__ == "__main__":
     main()
-    # call_tool(
+    # call_tools(
     #     [
     #         ChatCompletionMessageFunctionToolCall(
     #             id="toolu_bdrk_012yAUUL1EU6wePXkQA9afEB",
     #             function=Function(
-    #                 arguments='{"file_path": "raspberry.py"}', name="read"
+    #                 arguments='{"file_path": "apple.py"}', name="read"
     #             ),
     #             type="function",
     #             index=0,
