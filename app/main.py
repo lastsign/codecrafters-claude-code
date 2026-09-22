@@ -71,8 +71,6 @@ def main():
     if not API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY is not set")
 
-    client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
-
     tools = [
         {
             "type": "function",
@@ -95,90 +93,9 @@ def main():
 
     messages = [{"role": "user", "content": args.p}]
 
-    # chat = client.chat.completions.create(
-    #     model="anthropic/claude-haiku-4.5",
-    #     messages=messages,
-    #     tools=tools,
-    # )
-
-    # if not chat.choices or len(chat.choices) == 0:
-    #     raise RuntimeError("no choices in response")
-
-    # # You can use print statements as follows for debugging, they'll be visible when running tests.
-    # print("Logs from your program will appear here!", file=sys.stderr)
-
-    # # TODO: Uncomment the following line to pass the first stage
-    # choice = chat.choices[0].message
-    # if choice.tool_calls:
-    #     if len(choice.tool_calls) > 1:
-    #         res = call_tools(choice.tool_calls)
-    #     elif len(choice.tool_calls) == 1:
-    #         res = call_tool(choice.tool_calls[0])
-    #         print(res)
-    # else:
-    #     print(chat.choices[0].message.content)
-
     agent = Agent(tools)
     agent.agent_loop(messages)
 
 
 if __name__ == "__main__":
     main()
-# ChatCompletion(
-#     id="gen-1790070615-YMKfj03z6epPt9Nmnhyl",
-#     choices=[
-#         Choice(
-#             finish_reason="tool_calls",
-#             index=0,
-#             logprobs=None,
-#             message=ChatCompletionMessage(
-#                 content=None,
-#                 refusal=None,
-#                 role="assistant",
-#                 annotations=None,
-#                 audio=None,
-#                 function_call=None,
-#                 tool_calls=[
-#                     ChatCompletionMessageFunctionToolCall(
-#                         id="toolu_bdrk_01Eqc3YZ1LMqYK5vUyuFfRkS",
-#                         function=Function(
-#                             arguments='{"file_path": "README.md"}', name="read"
-#                         ),
-#                         type="function",
-#                         index=0,
-#                     )
-#                 ],
-#                 reasoning=None,
-#             ),
-#             native_finish_reason="tool_use",
-#         )
-#     ],
-#     created=1790070615,
-#     model="anthropic/claude-haiku-4.5",
-#     object="chat.completion",
-#     service_tier="default",
-#     system_fingerprint=None,
-#     usage=CompletionUsage(
-#         completion_tokens=56,
-#         prompt_tokens=595,
-#         total_tokens=651,
-#         completion_tokens_details=CompletionTokensDetails(
-#             accepted_prediction_tokens=None,
-#             audio_tokens=0,
-#             reasoning_tokens=0,
-#             rejected_prediction_tokens=None,
-#             image_tokens=0,
-#         ),
-#         prompt_tokens_details=PromptTokensDetails(
-#             audio_tokens=0, cached_tokens=0, cache_write_tokens=0, video_tokens=0
-#         ),
-#         cost=0.00086625,
-#         is_byok=False,
-#         cost_details={
-#             "upstream_inference_cost": 0.000875,
-#             "upstream_inference_prompt_cost": 0.000595,
-#             "upstream_inference_completions_cost": 0.00028,
-#         },
-#     ),
-#     provider="Amazon Bedrock",
-# )
