@@ -17,6 +17,7 @@ local_tools = {"read": read}
 
 
 def call_tool(tool):
+    print(tool)
     func = tool.get("function", {})
     name = func.get("name")
     arguments = func.get("arguments")
