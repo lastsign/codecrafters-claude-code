@@ -79,12 +79,13 @@ def main():
 
     # TODO: Uncomment the following line to pass the first stage
     choice = chat.choices[0]
-    if choice.tool_calls:
-        if len(choice.tool_calls) > 1:
-            res = call_tools(choice.tool_calls)
+    tool_calls = choice.get("tool_calls", [])
+    if tool_calls:
+        if len(tool_calls) > 1:
+            res = call_tools(tool_calls)
             print(res)
-        elif len(choice.tool_calls) == 1:
-            res = call_tool(choice.tool_calls[0])
+        elif len(tool_calls) == 1:
+            res = call_tool(tool_calls[0])
             print(res)
     else:
         print(chat.choices[0].message.content)
