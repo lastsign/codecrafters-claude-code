@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from app.tools import bash, read, write
+from app.tools import bash, get_tools, read, write
 
 load_dotenv()
 
@@ -50,13 +50,21 @@ class Agent:
     def agent_loop(self, messages):
         while True:
             response = self.call_api(messages)
-            messages.append(response.choices[0].message)
 
-            if not response.choices[0].message.tool_calls:
-                print(response.choices[0].message.content)
+            if not response.choices or len(response.choices) == 0:
+                raise RuntimeError("no choices in response")
+
+            message = response.choices[0].message
+            print(message)
+            exit(1)
+
+            messages.append(message)
+
+            if not message.tool_calls:
+                print(message.content)
                 break
 
-            for tool in response.choices[0].message.tool_calls:
+            for tool in message.tool_calls:
                 result = call_tool(tool)
                 messages.append(
                     {"role": "tool", "tool_call_id": tool.id, "content": result}
@@ -71,65 +79,9 @@ def main():
     if not API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY is not set")
 
-    tools = [
-        {
-            "type": "function",
-            "function": {
-                "name": "read",
-                "description": "Read and return the contents of a file",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "file_path": {
-                            "type": "string",
-                            "description": "The path to the file to read",
-                        }
-                    },
-                    "required": ["file_path"],
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "write",
-                "description": "Write content to a file",
-                "parameters": {
-                    "type": "object",
-                    "required": ["file_path", "content"],
-                    "properties": {
-                        "file_path": {
-                            "type": "string",
-                            "description": "The path of the file to write to",
-                        },
-                        "content": {
-                            "type": "string",
-                            "description": "The content to write to the file",
-                        },
-                    },
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "bash",
-                "description": "Execute a shell command",
-                "parameters": {
-                    "type": "object",
-                    "required": ["command"],
-                    "properties": {
-                        "command": {
-                            "type": "string",
-                            "description": "The command to execute",
-                        }
-                    },
-                },
-            },
-        },
-    ]
-
     messages = [{"role": "user", "content": args.p}]
+
+    tools = get_tools()
 
     agent = Agent(tools)
     agent.agent_loop(messages)
