@@ -3,6 +3,8 @@ import shlex
 import subprocess
 from pathlib import Path
 
+from app.main import Agent
+
 ALLOWED = {"rm", "ls", "cat", "grep", "echo"}
 
 
@@ -13,7 +15,7 @@ def bash(command: str) -> str:
     if name not in ALLOWED:
         return f"command not allowed: {name}"
 
-    if os.path.basename(args[0]) == "rm" and not Path(args[-1]).is_file():
+    if os.path.basename(args[0]) == "rm" and not any(Path(arg).is_file() for arg in args):
         return ""
 
     result = subprocess.run(args, capture_output=True, shell=False, check=True)
