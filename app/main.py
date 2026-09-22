@@ -79,6 +79,7 @@ def main():
 
     # TODO: Uncomment the following line to pass the first stage
     choice = chat.choices[0]
+    print(choice)
     if not choice.message and choice.tool_calls:
         if len(choice.tool_calls) > 1:
             res = call_tools(choice.tool_calls)
