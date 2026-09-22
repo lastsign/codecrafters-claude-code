@@ -4,7 +4,9 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from app.tools import bash, get_tools, read, write
+from app.tools import bash, read, write
+
+from .get_tools import get_tools
 
 load_dotenv()
 
