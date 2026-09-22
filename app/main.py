@@ -1,4 +1,5 @@
 import argparse
+from http import client
 import os
 import sys
 
@@ -34,6 +35,40 @@ def call_tools(tools):
     return results
 
 
+class Agent:
+    def __init__(self, tools, model="anthropic/claude-haiku-4.5"):
+        self.client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
+        self.tools = tools
+        self.model = model
+
+    def call_api(self, messages):
+        chat = self.client.chat.completions.create(
+            model=self.model,
+            messages=messages
+            tools=self.tools,
+        )
+        return chat
+
+    def agent_loop(self, messages):
+        while True:
+            response = self.call_api(messages)
+            messages.append(response)
+
+            if not response.choices[0].message.tool_calls:
+                print(response.choices[0].message.content)
+                break
+
+            for tool in response.choices[0].message.tool_calls:
+                result = call_tool(tool)
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool.id,
+                        "content": result
+                    }
+                )
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("-p", required=True)
@@ -64,81 +99,34 @@ def main():
         }
     ]
 
-    chat = client.chat.completions.create(
-        model="anthropic/claude-haiku-4.5",
-        messages=[{"role": "user", "content": args.p}],
-        tools=tools,
-    )
+    messages = [{"role": "user", "content": args.p}]
 
-    if not chat.choices or len(chat.choices) == 0:
-        raise RuntimeError("no choices in response")
+    # chat = client.chat.completions.create(
+    #     model="anthropic/claude-haiku-4.5",
+    #     messages=messages,
+    #     tools=tools,
+    # )
 
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
-    print("Logs from your program will appear here!", file=sys.stderr)
+    # if not chat.choices or len(chat.choices) == 0:
+    #     raise RuntimeError("no choices in response")
 
-    # TODO: Uncomment the following line to pass the first stage
-    choice = chat.choices[0].message
-    if choice.tool_calls:
-        if len(choice.tool_calls) > 1:
-            res = call_tools(choice.tool_calls)
-        elif len(choice.tool_calls) == 1:
-            res = call_tool(choice.tool_calls[0])
-            print(res)
-    else:
-        print(chat.choices[0].message.content)
+    # # You can use print statements as follows for debugging, they'll be visible when running tests.
+    # print("Logs from your program will appear here!", file=sys.stderr)
 
+    # # TODO: Uncomment the following line to pass the first stage
+    # choice = chat.choices[0].message
+    # if choice.tool_calls:
+    #     if len(choice.tool_calls) > 1:
+    #         res = call_tools(choice.tool_calls)
+    #     elif len(choice.tool_calls) == 1:
+    #         res = call_tool(choice.tool_calls[0])
+    #         print(res)
+    # else:
+    #     print(chat.choices[0].message.content)
 
-from pydantic import BaseModel
-
-
-class Function(BaseModel):
-    arguments: str
-    name: str
-
-
-class ChatCompletionMessageFunctionToolCall(BaseModel):
-    id: str
-    function: Function
-    type: str
-    index: int
+    agent = Agent(client, tools)
+    agent.agent_loop(messages)
 
 
 if __name__ == "__main__":
     main()
-    # call_tools(
-    #     [
-    #         ChatCompletionMessageFunctionToolCall(
-    #             id="toolu_bdrk_012yAUUL1EU6wePXkQA9afEB",
-    #             function=Function(
-    #                 arguments='{"file_path": "apple.py"}', name="read"
-    #             ),
-    #             type="function",
-    #             index=0,
-    #         )
-    #     ]
-    # )
-    # Choice(
-    #     finish_reason="tool_calls",
-    #     index=0,
-    #     logprobs=None,
-    #     message=ChatCompletionMessage(
-    #         content=None,
-    #         refusal=None,
-    #         role="assistant",
-    #         annotations=None,
-    #         audio=None,
-    #         function_call=None,
-    #         tool_calls=[
-    #             ChatCompletionMessageFunctionToolCall(
-    #                 id="toolu_bdrk_012yAUUL1EU6wePXkQA9afEB",
-    #                 function=Function(
-    #                     arguments='{"file_path": "raspberry.py"}', name="read"
-    #                 ),
-    #                 type="function",
-    #                 index=0,
-    #             )
-    #         ],
-    #         reasoning=None,
-    #     ),
-    #     native_finish_reason="tool_use",
-    # )
