@@ -3,7 +3,7 @@ import os
 
 
 def get_tools():
-    script_path = os.path.dirname(os.path.abspath(__name__))
+    script_path = os.path.dirname(os.path.abspath(__file__))
     tools_path = os.path.join(script_path, "tools.json")
 
     with open(tools_path) as f:
