@@ -1,4 +1,3 @@
-import cmd
 import os
 import queue
 import subprocess
@@ -52,7 +51,7 @@ class Sandbox:
         ).start()
 
     @staticmethod
-    def _reader(p, q):
+    def _reader(p, q: queue.Queue):
         for line in p.stdout:
             q.put(line)
         q.put(None)
@@ -87,39 +86,6 @@ class Sandbox:
                 out.append(line[:i])
                 return "".join(out), int(line[i:].split()[1])
             out.append(line)
+
+
 sandbox = Sandbox()
-
-p = subprocess.Popen(
-    sbx_cmd("bash"),
-    stdin=subprocess.PIPE,
-    stdout=subprocess.PIPE,
-    stderr=subprocess.STDOUT,
-    text=True,
-    bufsize=1,
-)
-print(p.pid)
-
-
-def run(cmd: str):
-    marker = uuid.uuid4().hex
-    p.stdin.write(f"{cmd}\necho {marker} $?\n")
-    p.stdin.flush()
-    out = []
-    for line in p.stdout:
-        if line.startswith(marker):
-            return "".join(out), int(line.split()[1])
-        out.append(line)
-    raise RuntimeError("sandbox died")
-
-
-if __name__ == "__main__":
-    try:
-        while True:
-            cmd = input("sbx λ ")
-            out, code = run(cmd)
-            print(out, end="")
-            print(f"[exit {code}]")
-    except KeyboardInterrupt, EOFError:
-        pass
-    finally:
-        p.terminate()
