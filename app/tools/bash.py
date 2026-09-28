@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from sandbox import Sandbox
+from app.tools.sandbox import Sandbox
 
 sandbox = Sandbox()
 
