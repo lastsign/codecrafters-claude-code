@@ -35,6 +35,7 @@ def sbx_cmd(*cmd, cwd=None):
 class Sandbox:
     def __init__(self, cwd=None):
         self.cwd = cwd or os.getcwd()
+        self._start()
 
     def _start(self):
         self.p = subprocess.Popen(

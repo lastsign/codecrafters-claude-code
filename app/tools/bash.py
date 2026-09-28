@@ -1,10 +1,7 @@
 import os
 from pathlib import Path
 
-from app.tools.sandbox import Sandbox
-
-sandbox = Sandbox()
-
+from app.tools.sandbox import sandbox
 
 ALLOWED = {"rm", "ls", "cat", "grep", "echo"}
 ROOT = Path.cwd().resolve()
