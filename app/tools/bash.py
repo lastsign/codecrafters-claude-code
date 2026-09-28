@@ -3,6 +3,8 @@ import shlex
 import subprocess
 from pathlib import Path
 
+from sandbox import sandbox
+
 ALLOWED = {"rm", "ls", "cat", "grep", "echo"}
 ROOT = Path.cwd().resolve()
 PROTECTED = {ROOT / ".git"}
@@ -35,29 +37,9 @@ def rm(targets: list[str]) -> str:
 
 def bash(command: str) -> str:
     try:
-        args = shlex.split(command)
-    except ValueError as e:
-        return f"parse error: {e}"
-
-    if not args:
-        return "empty command"
-    name = args[0]
-    if name not in ALLOWED:
-        return f"command not allowed: {name}"
-
-    if name == "rm":
-        return rm(args[1:])
-
-    if name != "echo":
-        for a in args[1:]:
-            if not a.startswith("-") and not inside_root(a):
-                return f"path outside project is not allowed: {a}"
-
-    try:
-        r = subprocess.run(
-            args, capture_output=True, text=True, timeout=30, cwd=ROOT, check=False
-        )
-    except subprocess.TimeoutExpired:
+        out, returncode = sandbox.run(command)
+    except TimeoutError:
         return "command timed out"
-    out = r.stdout + r.stderr
-    return out if r.returncode == 0 else f"exit code {r.returncode}\n{out}"
+    finally:
+        sandbox.close()
+    return out if returncode == 0 else f"exit code {returncode}\n{out}"
