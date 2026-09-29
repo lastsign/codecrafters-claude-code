@@ -38,6 +38,8 @@ def bash(command: str) -> str:
         out, returncode = sandbox.run(command)
     except TimeoutError:
         return "command timed out"
+    except RuntimeError as e:
+        return str(e)
     finally:
         sandbox.close()
     return out if returncode == 0 else f"exit code {returncode}\n{out}"

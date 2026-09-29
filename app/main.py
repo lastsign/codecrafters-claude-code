@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from app.tools import bash, get_tools, read, write
+from app.tools import bash, get_tools, human_in_the_loop, read, write
 
 load_dotenv()
 
@@ -13,7 +13,12 @@ BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v
 
 
 def call_tool(tool):
-    local_tools = {"read": read, "write": write, "bash": bash}
+    local_tools = {
+        "read": read,
+        "write": write,
+        "bash": bash,
+        "human_in_the_loop": human_in_the_loop,
+    }
 
     func = tool.function
     name = func.name
@@ -34,7 +39,7 @@ def call_tools(tools):
 
 class Agent:
     def __init__(self, tools, model="anthropic/claude-haiku-4.5"):
-        self.client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
+        self.client = OpenAI(api_key=API_KEY, base_url="https://api.openai.com/v1/")
         self.tools = tools
         self.model = model
 
@@ -43,6 +48,7 @@ class Agent:
             model=self.model,
             messages=messages,
             tools=self.tools,
+            reasoning_effort="none",
         )
         return chat
 
@@ -78,11 +84,17 @@ def main():
     if not API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY is not set")
 
-    messages = [{"role": "user", "content": args.p}]
+    messages = [
+        {
+            "role": "system",
+            "content": "You are an expert coding assistant operating inside a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.",
+        },
+        {"role": "user", "content": args.p},
+    ]
 
     tools = get_tools()
 
-    agent = Agent(tools)
+    agent = Agent(tools, model="gpt-5.6-luna")
     agent.agent_loop(messages)
 
 

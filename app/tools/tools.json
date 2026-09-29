@@ -60,5 +60,24 @@
                 }
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "human_in_the_loop",
+            "description": "Ask for clarification if required",
+            "parameters": {
+                "type": "object",
+                "required": [
+                    "question"
+                ],
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": "The question to ask"
+                    }
+                }
+            }
+        }
     }
 ]
