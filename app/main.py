@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
+from app.prompts import system_prompt
+from app.skills.parser import get_available_skills
 from app.tools import bash, get_tools, human_in_the_loop, read, write
 
 load_dotenv()
@@ -82,13 +84,33 @@ def main():
 
     if not API_KEY:
         raise RuntimeError("OPENROUTER_API_KEY is not set")
+    prompt = args.p
+    skills: dict[str, tuple[dict[str, str], str, str]] = get_available_skills()  # type: ignore
+
+    skills_desc = ["<available_skills>"]
+    for frontmatter, body, path in skills.values():
+        skills_desc.append("<skill>")
+        skills_desc.append("<name>")
+        skills_desc.append(frontmatter["name"])
+        skills_desc.append("</name>")
+        skills_desc.append("<description>")
+        skills_desc.append(frontmatter["description"])
+        skills_desc.append("</description>")
+        skills_desc.append("<location>")
+        skills_desc.append(path)
+        skills_desc.append("</location>")
+        skills_desc.append("</skill>")
+    skills_desc.append("</available_skills>")
+
+    if args.p.startswith("/") and args.p[1:] in skills:
+        _, prompt, _ = skills[args.p[1:]]
 
     messages = [
         {
             "role": "system",
-            "content": "You are an expert coding assistant operating inside a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.",
+            "content": system_prompt.format(skills="\n".join(skills_desc)),
         },
-        {"role": "user", "content": args.p},
+        {"role": "user", "content": prompt},
     ]
 
     tools = get_tools()
