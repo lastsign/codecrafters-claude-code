@@ -39,7 +39,7 @@ def call_tools(tools):
 
 class Agent:
     def __init__(self, tools, model="anthropic/claude-haiku-4.5"):
-        self.client = OpenAI(api_key=API_KEY, base_url="https://api.openai.com/v1/")
+        self.client = OpenAI(api_key=API_KEY, base_url=BASE_URL)
         self.tools = tools
         self.model = model
 
@@ -48,7 +48,6 @@ class Agent:
             model=self.model,
             messages=messages,
             tools=self.tools,
-            reasoning_effort="none",
         )
         return chat
 
@@ -94,7 +93,7 @@ def main():
 
     tools = get_tools()
 
-    agent = Agent(tools, model="gpt-5.6-luna")
+    agent = Agent(tools)
     agent.agent_loop(messages)
 
 
