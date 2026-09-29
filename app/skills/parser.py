@@ -49,15 +49,10 @@ def get_available_skills():
     skills_prefix = ".claude/skills/"
     skills_dir = Path(Path.cwd() / skills_prefix)
 
-    if not skills_dir.exists():
-        return [f"Path does not exist: {skills_dir}"]
-
-    if not skills_dir.is_dir():
-        return [f"Not a directory: {skills_dir}"]
-
     skills = {}
-    for skill_folder in skills_dir.iterdir():
-        if skill_folder.is_dir() and Path(skill_folder / "SKILL.md").exists():
-            skills[skill_folder.name.lower()] = parse_skill(skill_folder)
+    if skills_dir.exists() and skills_dir.is_dir():
+        for skill_folder in skills_dir.iterdir():
+            if skill_folder.is_dir() and Path(skill_folder / "SKILL.md").exists():
+                skills[skill_folder.name.lower()] = parse_skill(skill_folder)
 
     return skills
