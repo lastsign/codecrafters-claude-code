@@ -88,5 +88,3 @@ class Sandbox:
                 return "".join(out), int(line[i:].split()[1])
             out.append(line)
 
-
-sandbox = Sandbox()
