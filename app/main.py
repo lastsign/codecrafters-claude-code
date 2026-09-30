@@ -1,5 +1,7 @@
 import argparse
 import os
+from itertools import zip_longest
+from string import Formatter
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -102,8 +104,18 @@ def main():
         skills_desc.append("</skill>")
     skills_desc.append("</available_skills>")
 
-    if args.p.startswith("/") and args.p[1:] in skills:
-        _, prompt, _ = skills[args.p[1:]]
+    if args.p.startswith("/"):
+        parts = args.p.split(" ")
+        skill_name = parts[0][1:]
+        if skill_name in skills:
+            _, prompt, _ = skills[skill_name]
+            fields = [f for _, f, _, _ in Formatter().parse(prompt) if f is not None]
+            placeholders = [
+                part if part is not None else ""
+                for part, _ in zip_longest(parts[1:], fields)
+            ]
+
+            prompt = prompt.format(*placeholders)
 
     messages = [
         {
