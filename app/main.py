@@ -1,7 +1,7 @@
 import argparse
 import os
-from itertools import zip_longest
-from string import Formatter
+import re
+import shlex
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -79,16 +79,7 @@ class Agent:
                 )
 
 
-def main():
-    p = argparse.ArgumentParser()
-    p.add_argument("-p", required=True)
-    args = p.parse_args()
-
-    if not API_KEY:
-        raise RuntimeError("OPENROUTER_API_KEY is not set")
-    prompt = args.p
-    skills: dict[str, tuple[dict[str, str], str, str]] = get_available_skills()  # type: ignore
-
+def prepare_skills_description(skills):
     skills_desc = ["<available_skills>"]
     for frontmatter, body, path in skills.values():
         skills_desc.append("<skill>")
@@ -103,19 +94,50 @@ def main():
         skills_desc.append("</location>")
         skills_desc.append("</skill>")
     skills_desc.append("</available_skills>")
+    return skills_desc
 
-    if args.p.startswith("/"):
-        parts = args.p.split(" ")
-        skill_name = parts[0][1:]
-        if skill_name in skills:
-            _, prompt, _ = skills[skill_name]
-            fields = [f for _, f, _, _ in Formatter().parse(prompt) if f is not None]
-            placeholders = [
-                part if part is not None else ""
-                for part, _ in zip_longest(parts[1:], fields)
-            ]
 
-            prompt = prompt.format(*placeholders)
+def pass_arguments_to_skill(arguments, skill_body):
+    pattern = r"\$ARGUMENTS\[(\d+)\]|\$ARGUMENTS|\$(\d+)"
+
+    def callback(m: re.Match) -> str:
+        if m.group(1):
+            i = int(m.group(1))
+        elif m.group(2):
+            i = int(m.group(2))
+        elif m.group(0):
+            return " ".join(arguments)
+        if i < len(arguments):
+            return arguments[i]
+        return ""
+
+    return re.sub(pattern, callback, skill_body)
+
+
+def load_skill(prompt, skills):
+    parts = shlex.split(prompt)
+    skill_name = parts[0][1:]
+    arguments = parts[1:]
+    if skill_name in skills:
+        _, skill_body, _ = skills[skill_name]
+        prompt = pass_arguments_to_skill(arguments, skill_body)
+    return prompt
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("-p", required=True)
+    args = p.parse_args()
+
+    if not API_KEY:
+        raise RuntimeError("OPENROUTER_API_KEY is not set")
+
+    prompt = args.p
+    skills = get_available_skills()
+    skills_desc = prepare_skills_description(skills)
+
+    if prompt.startswith("/"):
+        prompt = load_skill(prompt, skills)
 
     messages = [
         {
@@ -124,7 +146,6 @@ def main():
         },
         {"role": "user", "content": prompt},
     ]
-
     tools = get_tools()
 
     agent = Agent(tools)
