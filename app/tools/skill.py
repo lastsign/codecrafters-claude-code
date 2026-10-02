@@ -4,7 +4,7 @@ from app.skills.load import pass_arguments_to_skill
 from app.skills.parser import get_available_skills
 
 
-def skill(name: str, args: str | None) -> str:
+def skill(name: str, args: str | None = None) -> str:
     if args:
         try:
             arguments = shlex.split(args)
