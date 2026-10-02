@@ -48,12 +48,10 @@ def parse_skill(skill_folder: Path) -> tuple[dict[str, str], str, str]:
 def get_available_skills():
     skills_prefix = ".claude/skills/"
     skills_dir = Path(Path.cwd() / skills_prefix)
-    skills_prefix = Path(".claude/skills/").resolve()
 
     skills = {}
     if skills_dir.exists() and skills_dir.is_dir():
         for skill_folder in skills_dir.iterdir():
-            print(skill_folder)
             if skill_folder.is_dir() and Path(skill_folder / "SKILL.md").exists():
                 skills[skill_folder.name.lower()] = parse_skill(
                     skills_prefix / skill_folder

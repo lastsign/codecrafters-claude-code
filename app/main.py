@@ -129,8 +129,15 @@ def load_skill(prompt, skills):
     arguments = parts[len(skill_names) :]
     for skill_name in skill_names:
         if skill_name in skills:
-            _, skill_body, _ = skills[skill_name]
-            content = pass_arguments_to_skill(arguments, skill_body)
+            _, skill_body, path = skills[skill_name]
+            body = pass_arguments_to_skill(arguments, skill_body)
+
+            content = (
+                f"Skill: {skill_name} (located at {path})\n"
+                "Paths in the instructions below are relative to that folder.\n\n"
+                f"{body}"
+            )
+
             loaded_skills.append({"role": "user", "content": content})
     return loaded_skills
 
@@ -162,9 +169,10 @@ def main():
         messages.append(prompt)
     if isinstance(prompt, list):
         messages.extend(prompt)
-    # tools = get_tools()
-    # agent = Agent(tools)
-    # agent.agent_loop(messages)
+
+    tools = get_tools()
+    agent = Agent(tools)
+    agent.agent_loop(messages)
 
 
 if __name__ == "__main__":

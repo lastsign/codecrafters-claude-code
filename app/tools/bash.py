@@ -78,3 +78,10 @@ def bash(command: str) -> str:
             return "command timed out"
         out = r.stdout + r.stderr + error
         return out if r.returncode == 0 else f"exit code {r.returncode}\n{out}"
+
+
+if __name__ == "__main__":
+    sandbox = Sandbox()
+
+    res = sandbox.run(".claude/skills/apple/scripts/checksum.sh")
+    print(res)
