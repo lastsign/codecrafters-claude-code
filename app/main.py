@@ -8,7 +8,7 @@ from openai import OpenAI
 
 from app.prompts import system_prompt
 from app.skills.parser import get_available_skills
-from app.tools import bash, get_tools, human_in_the_loop, read, write
+from app.tools import bash, human_in_the_loop, read, write
 
 load_dotenv()
 
@@ -101,27 +101,36 @@ def pass_arguments_to_skill(arguments, skill_body):
     pattern = r"\$ARGUMENTS\[(\d+)\]|\$ARGUMENTS|\$(\d+)"
 
     def callback(m: re.Match) -> str:
-        if m.group(1):
-            i = int(m.group(1))
-        elif m.group(2):
-            i = int(m.group(2))
-        elif m.group(0):
+        if m.group(0):
             return " ".join(arguments)
-        if i < len(arguments):
+        i = int(m.group(1)) or int(m.group(2))
+        if i and i < len(arguments):
             return arguments[i]
         return ""
 
-    return re.sub(pattern, callback, skill_body)
+    result, count = re.subn(pattern, callback, skill_body)
+    if count == 0 and arguments:
+        result = f"{skill_body}\n\nARGUMENTS: {' '.join(arguments)}"
+
+    return result
 
 
 def load_skill(prompt, skills):
-    parts = shlex.split(prompt)
-    skill_name = parts[0][1:]
-    arguments = parts[1:]
-    if skill_name in skills:
-        _, skill_body, _ = skills[skill_name]
-        prompt = pass_arguments_to_skill(arguments, skill_body)
-    return prompt
+    prompts = prompt.split("/")
+    loaded_skills = []
+    for prompt in prompts[1:]:
+        try:
+            parts = shlex.split(prompt)
+        except Exception:
+            parts = prompt.split()
+        skill_name = parts[0]
+        arguments = parts[1:]
+        if skill_name in skills:
+            _, skill_body, _ = skills[skill_name]
+            content = pass_arguments_to_skill(arguments, skill_body)
+            print(content)
+            loaded_skills.append({"role": "user", "content": content})
+    return loaded_skills
 
 
 def main():
@@ -136,20 +145,26 @@ def main():
     skills = get_available_skills()
     skills_desc = prepare_skills_description(skills)
 
-    if prompt.startswith("/"):
-        prompt = load_skill(prompt, skills)
-
     messages = [
         {
             "role": "system",
             "content": system_prompt.format(skills="\n".join(skills_desc)),
         },
-        {"role": "user", "content": prompt},
     ]
-    tools = get_tools()
 
-    agent = Agent(tools)
-    agent.agent_loop(messages)
+    if prompt.startswith("/"):
+        prompt = load_skill(prompt, skills)
+    else:
+        prompt = {"role": "user", "content": prompt}
+    if isinstance(prompt, dict):
+        messages.append(prompt)
+    if isinstance(prompt, list):
+        messages.extend(prompt)
+
+    # tools = get_tools()
+
+    # agent = Agent(tools)
+    # agent.agent_loop(messages)
 
 
 if __name__ == "__main__":
