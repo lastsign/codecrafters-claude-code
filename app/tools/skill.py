@@ -1,10 +1,11 @@
 import shlex
 
+from app.agent.agent import agent
 from app.skills.load import pass_arguments_to_skill
 from app.skills.parser import get_available_skills
 
 
-def skill(name: str, args: str | None = None) -> str:
+def skill(name: str, args: str | None = None) -> str | None:
     arguments = []
     if args:
         try:
@@ -12,7 +13,7 @@ def skill(name: str, args: str | None = None) -> str:
         except Exception:
             arguments = args.split()
     skills = get_available_skills()
-    _, skill_body, path = skills[name]
+    frontmatter, skill_body, path = skills[name]
     body = pass_arguments_to_skill(arguments, skill_body)
 
     content = (
@@ -20,4 +21,10 @@ def skill(name: str, args: str | None = None) -> str:
         "Paths in the instructions below are relative to that folder.\n\n"
         f"{body}"
     )
+
+    if "context" in frontmatter and frontmatter["context"] == "fork":
+        messages = [{"role": "user", "content": content}]
+        result = agent.agent_loop(messages)
+        return f"Skill {name} ran in a separate context and returned: {result}"
+
     return content
