@@ -117,19 +117,21 @@ def pass_arguments_to_skill(arguments, skill_body):
 
 
 def load_skill(prompt, skills):
-    prompts = prompt.split("/")
+    try:
+        parts = shlex.split(prompt)
+    except Exception:
+        parts = prompt.split()
+    skill_names = []
+    for part in parts:
+        if part.startswith("/") and part[1:] in skills:
+            skill_names.append(part[1:])
+
     loaded_skills = []
-    for prompt in prompts[1:]:
-        try:
-            parts = shlex.split(prompt)
-        except Exception:
-            parts = prompt.split()
-        skill_name = parts[0]
-        arguments = parts[1:]
+    arguments = parts[len(skill_names) :]
+    for skill_name in skill_names:
         if skill_name in skills:
             _, skill_body, _ = skills[skill_name]
             content = pass_arguments_to_skill(arguments, skill_body)
-            print(content)
             loaded_skills.append({"role": "user", "content": content})
     return loaded_skills
 
