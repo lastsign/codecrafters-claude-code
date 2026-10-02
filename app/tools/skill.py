@@ -5,6 +5,7 @@ from app.skills.parser import get_available_skills
 
 
 def skill(name: str, args: str | None = None) -> str:
+    arguments = []
     if args:
         try:
             arguments = shlex.split(args)
