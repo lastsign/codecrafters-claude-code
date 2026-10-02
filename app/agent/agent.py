@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from app.tools import bash, get_tools, human_in_the_loop, read, skill, write
+from app.tools import bash, get_tools, human_in_the_loop, read, write
 
 load_dotenv()
 
@@ -17,12 +17,16 @@ def call_tool(tool):
         "write": write,
         "bash": bash,
         "human_in_the_loop": human_in_the_loop,
-        "skill": skill,
+        # "skill": skill,
     }
 
     func = tool.function
     name = func.name
     arguments = eval(func.arguments)
+    if name == "skill":
+        from app.tools import skill
+
+        skill(**arguments)
     callable = local_tools.get(name)
     if callable:
         return callable(**arguments)
