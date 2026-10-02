@@ -1,4 +1,5 @@
 import argparse
+import html
 import os
 import re
 import shlex
@@ -36,7 +37,6 @@ def call_tools(tools):
     results = []
     for tool in tools:
         res = call_tool(tool)
-        print(res)
         results.append(res)
     return results
 
@@ -80,21 +80,20 @@ class Agent:
 
 
 def prepare_skills_description(skills):
-    skills_desc = []
-    # skills_desc = ["<available_skills>"]
+    skills_desc = ["<available_skills>"]
     for frontmatter, body, path in skills.values():
-        # skills_desc.append("<skill>")
-        # skills_desc.append("<name>")
-        skills_desc.append(frontmatter["name"])
-        # skills_desc.append("</name>")
-        # skills_desc.append("<description>")
-        skills_desc.append(frontmatter["description"])
-        # skills_desc.append("</description>")
-        # skills_desc.append("<location>")
-        # skills_desc.append(path)
-        # skills_desc.append("</location>")
-        # skills_desc.append("</skill>")
-    # skills_desc.append("</available_skills>")
+        skills_desc.append("<skill>")
+        skills_desc.append("<name>")
+        skills_desc.append(html.escape(frontmatter["name"]))
+        skills_desc.append("</name>")
+        skills_desc.append("<description>")
+        skills_desc.append(html.escape(frontmatter["description"]))
+        skills_desc.append("</description>")
+        skills_desc.append("<location>")
+        skills_desc.append(path)
+        skills_desc.append("</location>")
+        skills_desc.append("</skill>")
+    skills_desc.append("</available_skills>")
     return skills_desc
 
 
@@ -163,11 +162,11 @@ def main():
         messages.append(prompt)
     if isinstance(prompt, list):
         messages.extend(prompt)
+    print(messages)
+    # tools = get_tools()
 
-    tools = get_tools()
-
-    agent = Agent(tools)
-    agent.agent_loop(messages)
+    # agent = Agent(tools)
+    # agent.agent_loop(messages)
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ def parse_skill(skill_folder: Path) -> tuple[dict[str, str], str, str]:
             f"Skill name is invalid it should be equal to folder name {skill_folder}."
         )
 
-    return frontmatter, body, f"{skill_folder.name.lower()}/SKILL.md"
+    return frontmatter, body, f"{skill_folder.resolve()}/SKILL.md"
 
 
 def get_available_skills():
