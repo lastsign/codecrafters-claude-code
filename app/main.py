@@ -8,7 +8,7 @@ from openai import OpenAI
 
 from app.prompts import system_prompt
 from app.skills.parser import get_available_skills
-from app.tools import bash, human_in_the_loop, read, write
+from app.tools import bash, get_tools, human_in_the_loop, read, write
 
 load_dotenv()
 
@@ -161,10 +161,10 @@ def main():
     if isinstance(prompt, list):
         messages.extend(prompt)
 
-    # tools = get_tools()
+    tools = get_tools()
 
-    # agent = Agent(tools)
-    # agent.agent_loop(messages)
+    agent = Agent(tools)
+    agent.agent_loop(messages)
 
 
 if __name__ == "__main__":
