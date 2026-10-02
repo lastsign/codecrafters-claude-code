@@ -80,20 +80,21 @@ class Agent:
 
 
 def prepare_skills_description(skills):
-    skills_desc = ["<available_skills>"]
+    skills_desc = []
+    # skills_desc = ["<available_skills>"]
     for frontmatter, body, path in skills.values():
-        skills_desc.append("<skill>")
-        skills_desc.append("<name>")
+        # skills_desc.append("<skill>")
+        # skills_desc.append("<name>")
         skills_desc.append(frontmatter["name"])
-        skills_desc.append("</name>")
-        skills_desc.append("<description>")
+        # skills_desc.append("</name>")
+        # skills_desc.append("<description>")
         skills_desc.append(frontmatter["description"])
-        skills_desc.append("</description>")
-        skills_desc.append("<location>")
-        skills_desc.append(path)
-        skills_desc.append("</location>")
-        skills_desc.append("</skill>")
-    skills_desc.append("</available_skills>")
+        # skills_desc.append("</description>")
+        # skills_desc.append("<location>")
+        # skills_desc.append(path)
+        # skills_desc.append("</location>")
+        # skills_desc.append("</skill>")
+    # skills_desc.append("</available_skills>")
     return skills_desc
 
 
