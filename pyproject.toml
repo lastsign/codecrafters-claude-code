@@ -7,3 +7,9 @@ dependencies = [
     "python-dotenv>=1.2.3",
     "strictyaml>=1.7.3",
 ]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+]
