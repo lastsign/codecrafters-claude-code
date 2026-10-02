@@ -24,6 +24,7 @@ def skill(name: str, args: str | None = None) -> str | None:
     )
 
     if "context" in frontmatter and frontmatter["context"] == "fork":
+        content, name
         messages = [{"role": "user", "content": content}]
         result = Agent(get_tools()).agent_loop(messages)
         return f"Skill {name} ran in a separate context and returned: {result}"

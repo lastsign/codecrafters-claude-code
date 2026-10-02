@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from app.tools import bash, get_tools, human_in_the_loop, read, write
+from app.tools import bash, get_tools, human_in_the_loop, read, skill, write
 
 load_dotenv()
 
@@ -17,16 +17,12 @@ def call_tool(tool):
         "write": write,
         "bash": bash,
         "human_in_the_loop": human_in_the_loop,
-        # "skill": skill,
+        "skill": skill,
     }
 
     func = tool.function
     name = func.name
     arguments = eval(func.arguments)
-    if name == "skill":
-        from app.tools import skill
-
-        skill(**arguments)
     callable = local_tools.get(name)
     if callable:
         return callable(**arguments)
@@ -73,6 +69,12 @@ class Agent:
 
             for tool in message.tool_calls:
                 result = call_tool(tool)
+                if isinstance(result, tuple):
+                    result, name = result
+                    if name:
+                        subagent_ans = self.agent_loop([{"role": "user", "content": result}])
+                        result = f"Skill {name} ran in a separate context and returned: {subagent_ans}"
+
                 messages.append(
                     {"role": "tool", "tool_call_id": tool.id, "content": result}
                 )
