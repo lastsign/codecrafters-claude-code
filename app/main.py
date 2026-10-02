@@ -162,11 +162,10 @@ def main():
         messages.append(prompt)
     if isinstance(prompt, list):
         messages.extend(prompt)
-    print(messages)
-    # tools = get_tools()
+    tools = get_tools()
 
-    # agent = Agent(tools)
-    # agent.agent_loop(messages)
+    agent = Agent(tools)
+    agent.agent_loop(messages)
 
 
 if __name__ == "__main__":
