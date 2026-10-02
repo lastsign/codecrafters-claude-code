@@ -1,6 +1,6 @@
 import shlex
 
-from app.agent.agent import agent
+from app.agent import agent
 from app.skills.load import pass_arguments_to_skill
 from app.skills.parser import get_available_skills
 

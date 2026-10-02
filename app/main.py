@@ -4,7 +4,7 @@ import os
 
 from dotenv import load_dotenv
 
-from app.agent.agent import agent
+from app.agent import agent
 from app.prompts import system_prompt
 from app.skills.load import load_skill
 from app.skills.parser import get_available_skills
