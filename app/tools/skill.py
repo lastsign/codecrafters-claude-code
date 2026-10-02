@@ -1,8 +1,9 @@
 import shlex
 
-from app.agent.agent import agent
+from app.agent import agent, Agent
 from app.skills.load import pass_arguments_to_skill
 from app.skills.parser import get_available_skills
+from app.tools import get_tools
 
 
 def skill(name: str, args: str | None = None) -> str | None:
@@ -24,7 +25,7 @@ def skill(name: str, args: str | None = None) -> str | None:
 
     if "context" in frontmatter and frontmatter["context"] == "fork":
         messages = [{"role": "user", "content": content}]
-        result = agent.agent_loop(messages)
+        result = Agent(get_tools()).agent_loop(messages)
         return f"Skill {name} ran in a separate context and returned: {result}"
 
     return content
