@@ -1,31 +1,14 @@
 from pathlib import Path
 
 
-def propagate_folder(file_path: Path) -> str:
-    if file_path.is_dir():
-        contents = {}
-        for file in file_path.iterdir():
-            if file.is_dir():
-                contents[str(file)] = propagate_folder(file)
-            else:
-                with file.open() as f:
-                    contents[str(file)] = f.read()
-        return contents
-
-
 def read(file_path: str) -> str:
-    q = Path(Path.cwd() / file_path)
+    p = Path(file_path).resolve()
 
-    if not q.exists():
-        return f"[Errno 2] No such file or directory: '{q}'"
-
-    if q.is_dir():
-        contents = propagate_folder(q)
-        return contents
-
-    with q.open() as f:
-        return f.read()
-
-
-if __name__ == "__main__":
-    print(read("app"))
+    if not p.exists():
+        return f"[Errno 2] No such file or directory: '{p}'"
+    try:
+        return f"File: {p}\n\n{p.read_text()}"
+    except IsADirectoryError:
+        return f"Error: {p} is a directory, not a file"
+    except OSError as e:
+        return f"Error reading {p}: {e}"
