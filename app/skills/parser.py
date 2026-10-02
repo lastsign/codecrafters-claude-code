@@ -42,7 +42,7 @@ def parse_skill(skill_folder: Path) -> tuple[dict[str, str], str, str]:
             f"Skill name is invalid it should be equal to folder name {skill_folder}."
         )
 
-    return frontmatter, body, f"{skill_folder.resolve()}/SKILL.md"
+    return frontmatter, body, str(skill_folder).replace(f"{Path.cwd()}/", "")
 
 
 def get_available_skills():
@@ -53,6 +53,8 @@ def get_available_skills():
     if skills_dir.exists() and skills_dir.is_dir():
         for skill_folder in skills_dir.iterdir():
             if skill_folder.is_dir() and Path(skill_folder / "SKILL.md").exists():
-                skills[skill_folder.name.lower()] = parse_skill(skill_folder)
+                skills[skill_folder.name.lower()] = parse_skill(
+                    skills_prefix / skill_folder
+                )
 
     return skills

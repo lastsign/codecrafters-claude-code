@@ -163,7 +163,6 @@ def main():
     if isinstance(prompt, list):
         messages.extend(prompt)
     tools = get_tools()
-
     agent = Agent(tools)
     agent.agent_loop(messages)
 
