@@ -1,4 +1,3 @@
-import shlex
 import subprocess
 from pathlib import Path
 
@@ -24,18 +23,21 @@ def bash(command: str) -> str:
             sandbox.close()
         return out if returncode == 0 else f"exit code {returncode}\n{out}"
     else:
-        try:
-            args = shlex.split(command)
-        except ValueError as e:
-            return f"parse error: {e}"
-        if not args:
+        if not command.strip():
             return "empty command"
 
         try:
             r = subprocess.run(
-                args, capture_output=True, text=True, timeout=30, cwd=ROOT, check=False
+                ["bash", "-c", command],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                cwd=ROOT,
+                check=False,
             )
         except subprocess.TimeoutExpired:
             return "command timed out"
+        except OSError as e:
+            return f"failed to run command: {e}"
         out = r.stdout + r.stderr + error
         return out if r.returncode == 0 else f"exit code {r.returncode}\n{out}"
