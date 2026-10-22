@@ -28,6 +28,8 @@ def bash(command: str) -> str:
             args = shlex.split(command)
         except ValueError as e:
             return f"parse error: {e}"
+        if not args:
+            return "empty command"
 
         try:
             r = subprocess.run(
